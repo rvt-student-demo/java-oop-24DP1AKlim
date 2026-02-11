@@ -1,10 +1,8 @@
 package rvt.studentu_registracija;
 
-import java.util.regex.Pattern;
-
 public class Validator {
     static boolean validateNameSurname(String name) {
-        String regexp = "^[A-Za-z]{3,}$"
+        String regexp = "^[A-Za-z]{3,}$";
         return name.matches(regexp);
     }
 
@@ -15,6 +13,6 @@ public class Validator {
 
     static boolean validatePerscode(String pers_code) {
         String regexp = "^\\d{6}-\\d{5}$";
-        return pers_code.matches(regepx);
+        return pers_code.matches(regexp);
     }
 }

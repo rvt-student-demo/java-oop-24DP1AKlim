@@ -14,5 +14,6 @@ public class Student {
         this.surname = surname;
         this.email = email;
         this.personal_code = personal_code;
+        this.reg_date = reg_date;
     }
 }

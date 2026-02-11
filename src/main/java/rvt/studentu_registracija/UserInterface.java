@@ -1,5 +1,7 @@
 package rvt.studentu_registracija;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -46,8 +48,14 @@ public class UserInterface {
                     continue;
                 }
 
-                System.out.print("Enter date: ");
+                System.out.print("Enter date (dd.MM.yyyy HH:mm): ");
                 String dateStr = scanner.nextLine();
+                try {
+                    LocalDateTime datetime = LocalDateTime.parse(dateStr,
+                            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+                } catch (Exception e) {
+
+                }
             } else if (in.equals("show")) {
 
             }
