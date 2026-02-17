@@ -7,7 +7,7 @@ public class Student {
     String surname;
     String email;
     String personal_code;
-    LocalDateTime reg_date;
+    LocalDateTime reg_date; // Registration date
 
     Student(String name, String surname, String email, String personal_code, LocalDateTime reg_date) {
         this.name = name;
