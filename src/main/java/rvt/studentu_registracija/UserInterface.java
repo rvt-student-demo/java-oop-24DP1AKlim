@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import rvt.util.ConsoleColors;
@@ -11,9 +12,11 @@ import rvt.util.ConsoleColors;
 public class UserInterface {
     HashMap<String, Student> students;
     FileHandler file;
+    HashSet<String> emails;
 
     UserInterface() {
         students = new HashMap<>();
+        emails = new HashSet<>();
         file = new FileHandler();
     }
 
@@ -46,12 +49,15 @@ public class UserInterface {
                     System.out.println("Student does not exists.");
                 }
 
+                emails.remove(students.get(pers_code).email);
                 students.remove(pers_code);
                 try {
                     file.writeStudents(students);
                 } catch (Exception e) {
                     System.err.println("WARN: Failed to write students to file: " + e.getMessage());
                 }
+
+                System.out.println(ConsoleColors.RED.code + "Student removed!" + ConsoleColors.RESET.code);
             } else if (in.equals("edit")) {
                 System.out.print("Enter students personal code: ");
                 String pers_code = scanner.nextLine();
@@ -62,6 +68,7 @@ public class UserInterface {
 
                 Student bk = students.get(pers_code);
                 students.remove(pers_code);
+                emails.remove(bk.email);
 
                 System.out.println("Enter new student info\n---------------------------------------------------------");
                 if (!addStudent(scanner)) {
@@ -106,10 +113,20 @@ public class UserInterface {
             return false;
         }
 
+        if (emails.contains(email)) {
+            System.out.println("Email already exists.");
+            return false;
+        }
+
         System.out.print("Enter personal code: ");
         String pers_code = scanner.nextLine();
         if (!Validator.validatePerscode(pers_code)) {
             System.out.println("Personal code is not valid.");
+            return false;
+        }
+
+        if (students.containsKey(pers_code)) {
+            System.out.println("Personal code exists.");
             return false;
         }
 
@@ -121,6 +138,7 @@ public class UserInterface {
 
             Student student = new Student(name, surname, email, pers_code, datetime);
             students.put(pers_code, student);
+            emails.add(email);
 
             try {
                 file.addStudent(student);
@@ -132,26 +150,36 @@ public class UserInterface {
             return false;
         }
 
+        System.out.println(ConsoleColors.GREEN.code + "Student added!" + ConsoleColors.RESET.code);
+
         return true;
     }
 
     void showData() {
-        int[] maxwidths = { 4, 7, 5, 13, 17 };
+        enum Widths {
+            PersonalCode,
+            Name,
+            Surname,
+            Email,
+            Date
+        }
+
+        int[] maxwidths = { 13, 4, 7, 5, 17 };
         for (Student student : students.values()) {
-            if (student.name.length() > maxwidths[0]) {
-                maxwidths[0] = student.name.length();
+            if (student.name.length() > maxwidths[Widths.Name.ordinal()]) {
+                maxwidths[Widths.Name.ordinal()] = student.name.length();
             }
-            if (student.surname.length() > maxwidths[1]) {
-                maxwidths[1] = student.surname.length();
+            if (student.surname.length() > maxwidths[Widths.Surname.ordinal()]) {
+                maxwidths[Widths.Surname.ordinal()] = student.surname.length();
             }
-            if (student.email.length() > maxwidths[2]) {
-                maxwidths[2] = student.email.length();
+            if (student.email.length() > maxwidths[Widths.Email.ordinal()]) {
+                maxwidths[Widths.Email.ordinal()] = student.email.length();
             }
-            if (student.personal_code.length() > maxwidths[3]) {
-                maxwidths[3] = student.personal_code.length();
+            if (student.personal_code.length() > maxwidths[Widths.PersonalCode.ordinal()]) {
+                maxwidths[Widths.PersonalCode.ordinal()] = student.personal_code.length();
             }
-            if (student.reg_date.toString().length() > maxwidths[4]) {
-                maxwidths[4] = student.reg_date.toString().length();
+            if (student.reg_date.toString().length() > maxwidths[Widths.Date.ordinal()]) {
+                maxwidths[Widths.Date.ordinal()] = student.reg_date.toString().length();
             }
         }
 
@@ -159,17 +187,21 @@ public class UserInterface {
         // String format = "| %-" + maxwidths[0] + "s | %-" + maxwidths[1] + "s | %-" +
         // maxwidths[2] + "| %-"
         // + maxwidths[3] + "s | %-" + "| %-" + maxwidths[4] + "s |%n";
-        String format = "| %-" + maxwidths[0] + "s | %-" + maxwidths[1] + "s | %-" + maxwidths[2] + "s |"
-                + ConsoleColors.GREEN.code + " %-"
-                + maxwidths[3] + "s " + ConsoleColors.RESET.code + "| %-" + maxwidths[4]
+        String format = "| %-" + maxwidths[Widths.PersonalCode.ordinal()] + "s | %-"
+                + maxwidths[Widths.Name.ordinal()]
+                + "s | %-" + maxwidths[Widths.Surname.ordinal()] + "s | %-"
+                + maxwidths[Widths.Email.ordinal()] + "s | %-" + maxwidths[Widths.Date.ordinal()]
                 + "s |%n";
 
         System.out.println(separator);
-        System.out.printf(format, "Name", "Surname", "Email", "Personal Code",
-                "Registration Date");
+        System.out.printf(format, ConsoleColors.GREEN.code + "Personal Code",
+                "Name",
+                "Surname", "Email",
+                "Registration Date" + ConsoleColors.RESET.code);
         for (Student student : students.values()) {
             System.out.println(separator);
-            System.out.printf(format, student.name, student.surname, student.email, student.personal_code,
+            System.out.printf(format, student.personal_code,
+                    student.name, student.surname, student.email,
                     student.reg_date);
         }
         System.out.println(separator);
